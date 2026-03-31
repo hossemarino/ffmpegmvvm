@@ -1,0 +1,60 @@
+<UserControl x:Class="FFMpegWrap.Views.CommandExplorerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Margin="8" Background="{DynamicResource AppBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <GroupBox Grid.Row="0" Header="Help Source" Margin="0,0,0,12">
+            <StackPanel Margin="12" Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center" Text="Tool" FontWeight="SemiBold" />
+                <ComboBox Width="160" Margin="12,0,12,0" ItemsSource="{Binding Tools}" SelectedItem="{Binding SelectedTool}" />
+                <TextBlock VerticalAlignment="Center" Text="Search" FontWeight="SemiBold" />
+                <TextBox Width="320" Margin="12,0,12,0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Padding="14,8" Command="{Binding LoadHelpCommand}" Content="Load Help" />
+            </StackPanel>
+        </GroupBox>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Grid.Column="0" Header="Categories" Margin="0,0,12,0">
+                <ListBox Margin="8" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" />
+            </GroupBox>
+
+            <GroupBox Grid.Column="1" Header="Options and Examples">
+                <ListView Margin="8" ItemsSource="{Binding VisibleEntries}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="10"
+                                    Margin="0,0,0,8"
+                                    Background="{DynamicResource AppElevatedSurfaceBrush}"
+                                    BorderBrush="{DynamicResource AppBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="4">
+                                <StackPanel>
+                                    <TextBlock FontWeight="SemiBold" Text="{Binding Flags}" />
+                                    <TextBlock Margin="0,4,0,0" TextWrapping="Wrap" Text="{Binding Description}" />
+                                    <TextBlock Margin="0,8,0,0" FontFamily="Cascadia Code" TextWrapping="Wrap" Text="{Binding ExampleUsage}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </GroupBox>
+        </Grid>
+
+        <TextBlock Grid.Row="2" Margin="0,12,0,0" Text="{Binding StatusMessage}" FontWeight="SemiBold" />
+    </Grid>
+</UserControl>
+
+

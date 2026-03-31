@@ -1,0 +1,68 @@
+﻿<Window x:Class="FFMpegWrap.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FFMpegWrap"
+        xmlns:views="clr-namespace:FFMpegWrap.Views"
+        mc:Ignorable="d"
+        Title="{Binding Title}"
+        Height="900"
+        Width="1440"
+        MinHeight="720"
+        MinWidth="1100">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Margin="0,0,0,12"
+                Padding="12"
+                Background="{DynamicResource AppSurfaceBrush}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="100"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="FFMpegWrap" FontSize="24" FontWeight="SemiBold" />
+                    <TextBlock Margin="0,4,0,0"
+                               Foreground="{DynamicResource AppMutedForegroundBrush}"
+                               Text="Unified FFmpeg and yt-dlp workspace" />
+                </StackPanel>
+
+                <TextBlock Grid.Column="1"
+                           Margin="0,0,12,0"
+                           VerticalAlignment="Center"
+                           Text="Theme"
+                           FontWeight="SemiBold" />
+
+                <ComboBox Grid.Column="2" Height="24"
+                          ItemsSource="{Binding Themes}"
+                          SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" />
+            </Grid>
+        </Border>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Local Media">
+                <views:LocalMediaView DataContext="{Binding LocalMedia}" />
+            </TabItem>
+            <TabItem Header="YouTube / Online">
+                <views:OnlineMediaView DataContext="{Binding OnlineMedia}" />
+            </TabItem>
+            <TabItem Header="Command Explorer">
+                <views:CommandExplorerView DataContext="{Binding CommandExplorer}" />
+            </TabItem>
+            <TabItem Header="Tools / Paths">
+                <views:ToolPathsView DataContext="{Binding ToolPaths}" />
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
