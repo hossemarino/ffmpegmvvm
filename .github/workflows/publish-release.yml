@@ -1,0 +1,76 @@
+name: Publish and release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    env:
+      ProjectPath: FFMpegWrap/FFMpegWrap.csproj
+      RuntimeIdentifier: win-x64
+      PublishDir: ${{ github.workspace }}\publish\win-x64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore $env:ProjectPath
+        shell: pwsh
+
+      - name: Publish
+        run: >-
+          dotnet publish $env:ProjectPath -c Release -r $env:RuntimeIdentifier --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false
+          -o $env:PublishDir
+        shell: pwsh
+
+      - name: Prepare release asset
+        id: asset
+        shell: pwsh
+        run: |
+          if ("${{ github.ref }}".StartsWith('refs/tags/')) {
+            $label = "${{ github.ref_name }}"
+          }
+          else {
+            $label = "manual-${{ github.run_number }}"
+          }
+
+          $exe = Get-ChildItem -Path $env:PublishDir -Filter '*.exe' | Sort-Object Length -Descending | Select-Object -First 1
+          if (-not $exe) {
+            throw 'Published executable not found.'
+          }
+
+          $assetName = "FFMpegWrap-$label-$env:RuntimeIdentifier.exe"
+          $assetPath = Join-Path $env:PublishDir $assetName
+
+          Copy-Item -Path $exe.FullName -Destination $assetPath -Force
+
+          "asset_name=$assetName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "asset_path=$assetPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FFMpegWrap-${{ github.run_number }}-win-x64
+          path: ${{ steps.asset.outputs.asset_path }}
+          if-no-files-found: error
+
+      - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.asset.outputs.asset_path }}
+          generate_release_notes: true

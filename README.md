@@ -35,6 +35,12 @@ dotnet build .\FFMpegWrap.slnx
 dotnet run --project .\FFMpegWrap\FFMpegWrap.csproj
 ```
 
+## Release
+
+- the GitHub Actions workflow at `.github/workflows/publish-release.yml` publishes a self-contained `win-x64` single-file executable
+- push a tag such as `v1.0.0` to build the app and create a GitHub release with the published `.exe` attached
+- run the workflow manually from the Actions tab to produce the same `.exe` as a downloadable workflow artifact
+
 ## First-time setup
 
 1. Launch the app.
