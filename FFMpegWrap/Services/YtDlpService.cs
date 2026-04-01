@@ -10,6 +10,7 @@ namespace FFMpegWrap.Services;
 /// </summary>
 public sealed partial class YtDlpService : IYtDlpService
 {
+    public const string DefaultCombinedFormatSelector = "bestvideo*+bestaudio/best";
     private static readonly Regex DownloadProgressRegex = new(@"\[download\]\s+(\d{1,3}(?:\.\d+)?)%", RegexOptions.Compiled);
     private readonly IProcessRunner _processRunner;
     private readonly IToolPathService _toolPathService;
@@ -147,17 +148,17 @@ public sealed partial class YtDlpService : IYtDlpService
     private static string BuildDownloadArguments(string url, string? formatId, string? outputName, string? outputDirectory)
     {
         var builder = new StringBuilder("--newline --progress --no-warnings ");
+        var effectiveFormatId = string.IsNullOrWhiteSpace(formatId)
+            ? DefaultCombinedFormatSelector
+            : formatId;
 
         var effectiveOutputDirectory = string.IsNullOrWhiteSpace(outputDirectory)
             ? Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
             : outputDirectory;
 
-        if (!string.IsNullOrWhiteSpace(formatId))
-        {
-            builder.Append("-f ");
-            builder.Append(Quote(formatId));
-            builder.Append(' ');
-        }
+        builder.Append("-f ");
+        builder.Append(Quote(effectiveFormatId));
+        builder.Append(' ');
 
         var outputTemplate = string.IsNullOrWhiteSpace(outputName)
             ? Path.Combine(effectiveOutputDirectory, "%(title)s.%(ext)s")

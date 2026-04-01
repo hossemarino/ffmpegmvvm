@@ -6,6 +6,14 @@ namespace FFMpegWrap.ViewModels;
 
 public sealed class OnlineMediaViewModel : ObservableObject
 {
+    private static readonly OnlineFormatOption DefaultBestQualityFormat = new()
+    {
+        FormatId = YtDlpService.DefaultCombinedFormatSelector,
+        Extension = "auto",
+        Resolution = "Best available",
+        Notes = "Default: highest quality video and audio"
+    };
+
     private readonly IFileDialogService _fileDialogService;
     private readonly IYtDlpService _ytDlpService;
     private readonly AsyncRelayCommand _loadFormatsCommand;
@@ -26,6 +34,7 @@ public sealed class OnlineMediaViewModel : ObservableObject
         _loadFormatsCommand = new AsyncRelayCommand(LoadFormatsAsync, () => !string.IsNullOrWhiteSpace(Url));
         _downloadCommand = new AsyncRelayCommand(DownloadAsync, () => !string.IsNullOrWhiteSpace(Url));
         _browseOutputFolderCommand = new RelayCommand(BrowseOutputFolder);
+        _selectedFormat = DefaultBestQualityFormat;
     }
 
     public ObservableCollection<OnlineFormatOption> Formats { get; } = [];
@@ -93,15 +102,17 @@ public sealed class OnlineMediaViewModel : ObservableObject
             StatusMessage = "Loading formats...";
 
             var formats = await _ytDlpService.GetAvailableFormatsAsync(Url);
+            Formats.Add(DefaultBestQualityFormat);
+
             foreach (var format in formats)
             {
                 Formats.Add(format);
             }
 
             SelectedFormat = Formats.FirstOrDefault();
-            StatusMessage = Formats.Count == 0
-                ? "No formats found."
-                : $"Loaded {Formats.Count} format option(s).";
+            StatusMessage = formats.Count == 0
+                ? "No explicit formats found. Downloads will use the best available video and audio."
+                : $"Loaded {formats.Count} format option(s). Default download uses the best available video and audio.";
         }
         catch (Exception ex)
         {
